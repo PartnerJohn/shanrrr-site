@@ -25,7 +25,7 @@ import {
 
 const KICK_URL = "https://kick.com/shanrrr";
 const DISCORD_URL = "#";
-const TWITTER_URL = "#";
+const TWITTER_URL = "https://x.com/shanohni";
 const INSTAGRAM_URL = "#";
 const TIKTOK_URL = "#";
 
@@ -214,8 +214,8 @@ const socials = [
     iconSmall: <XIcon className="w-4 h-4" />,
     accent: "#f0eaf8",
     url: TWITTER_URL,
-    intentUrl: "https://twitter.com/intent/follow?screen_name=shanrrr",
-    handle: "@shanrrr",
+    intentUrl: "https://twitter.com/intent/follow?screen_name=shanohni",
+    handle: "@shanohni",
     desc: "Stay up to date with announcements, clips, and hot takes.",
     cta: "Follow on X",
   },
