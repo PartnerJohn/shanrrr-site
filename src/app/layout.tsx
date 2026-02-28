@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import BlobBackground from "./components/BlobBackground";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 const geistMono = Geist_Mono({
@@ -13,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Shanrrr | Kick Gaming Streamer",
-  description: "Shanrrr's official streamer site — catch the streams, check the schedule, join the community.",
+  title: "Shanrrr | Rewards & Leaderboards",
+  description: "Earn points, climb the leaderboard, and join the Shanrrr community.",
 };
 
 export default function RootLayout({
@@ -24,9 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${poppins.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >
+        <BlobBackground />
         {children}
       </body>
     </html>
