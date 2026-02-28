@@ -18,13 +18,13 @@ import {
 } from "@/components/ui/table";
 
 import { Gift } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 
 const KICK_URL = "https://kick.com/shanrrr";
-const DISCORD_URL = "#";
+const DISCORD_URL = "https://discord.gg/UsHTKFhrEb";
 const TWITTER_URL = "https://x.com/shanohni";
 const INSTAGRAM_URL = "#";
 const TIKTOK_URL = "#";
@@ -182,6 +182,118 @@ function PodiumCard({ player, rank, className }: { player: typeof leaderboardDat
         </CardContent>
       </Card>
     </motion.div>
+  );
+}
+
+interface KickStatus {
+  is_live: boolean;
+  title?: string;
+  viewers?: number;
+  started_at?: string;
+}
+
+function useKickStatus() {
+  const [status, setStatus] = useState<KickStatus>({ is_live: false });
+
+  const check = useCallback(async () => {
+    try {
+      const res = await fetch("/api/kick-status");
+      const data = await res.json();
+      setStatus(data);
+    } catch {
+      // silently fail
+    }
+  }, []);
+
+  useEffect(() => {
+    check();
+    const interval = setInterval(check, 60_000); // poll every 60s
+    return () => clearInterval(interval);
+  }, [check]);
+
+  return status;
+}
+
+function StreamSection() {
+  const kickStatus = useKickStatus();
+
+  return (
+    <section id="stream" className="pt-10 pb-16 sm:pb-20 px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto">
+        <motion.div
+          className="text-center mb-8 sm:mb-12"
+          initial="hidden" whileInView="visible" viewport={{ once: false }}
+          variants={bounceIn}
+        >
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <h2 className="text-2xl sm:text-3xl font-bold gradient-text-full inline-block">Watch the Stream</h2>
+            {kickStatus.is_live && (
+              <Badge className="bg-red-500 text-white border-0 animate-pulse text-xs">
+                LIVE
+              </Badge>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {kickStatus.is_live
+              ? kickStatus.title || "Shanrrr is live now!"
+              : "Catch Shanrrr live on Kick"}
+          </p>
+        </motion.div>
+
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: false }} variants={bounceIn}>
+          <Card className={`bg-[#2a2438]/60 backdrop-blur-xl rounded-2xl relative overflow-hidden transition-all duration-500 ${
+            kickStatus.is_live
+              ? "border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.15)]"
+              : "border-[#b07aff]/10"
+          }`}>
+            <CardContent className="p-4 sm:p-6">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#b07aff]/8">
+                <iframe
+                  src="https://player.kick.com/shanrrr"
+                  width="100%"
+                  height="100%"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                  title="Shanrrr Kick Stream"
+                />
+              </div>
+              <div className="mt-3 sm:mt-4 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 shrink-0">
+                  {kickStatus.is_live ? (
+                    <>
+                      <motion.div
+                        className="w-2 h-2 rounded-full bg-red-500"
+                        animate={{ opacity: [0.6, 1, 0.6] }}
+                        transition={{ repeat: Infinity, duration: 1 }}
+                      />
+                      <span className="text-xs sm:text-sm text-red-400 font-semibold">Live Now</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-2 h-2 rounded-full bg-[#6b5f7e]" />
+                      <span className="text-xs sm:text-sm text-muted-foreground font-medium">Offline</span>
+                    </>
+                  )}
+                </div>
+                {kickStatus.is_live ? (
+                  <Badge className="bg-red-500/10 text-red-400 border-red-500/20 text-[10px] sm:text-xs">
+                    <Eye className="w-3 h-3 mr-1" />
+                    {kickStatus.viewers?.toLocaleString()} watching
+                  </Badge>
+                ) : (
+                  <Button variant="outline" size="sm" asChild className="border-[#53fc18]/20 text-[#53fc18] hover:bg-[#53fc18]/10 text-[10px] sm:text-xs h-7">
+                    <a href={KICK_URL} target="_blank" rel="noopener noreferrer">
+                      <KickIcon className="w-3 h-3 mr-1" />
+                      Follow on Kick
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </section>
   );
 }
 
@@ -523,48 +635,7 @@ export default function Home() {
       </section>
 
       {/* Live Stream Section */}
-      <section id="stream" className="pt-10 pb-16 sm:pb-20 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            className="text-center mb-8 sm:mb-12"
-            initial="hidden" whileInView="visible" viewport={{ once: false }}
-            variants={bounceIn}
-          >
-            <h2 className="text-2xl sm:text-3xl font-bold gradient-text-full inline-block">Watch the Stream</h2>
-            <p className="text-sm text-muted-foreground mt-2">Catch Shanrrr live on Kick</p>
-          </motion.div>
-
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: false }} variants={bounceIn}>
-            <Card className="bg-[#2a2438]/60 backdrop-blur-xl border-[#b07aff]/10 rounded-2xl relative overflow-hidden">
-              <CardContent className="p-4 sm:p-6">
-                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#b07aff]/8">
-                  <iframe
-                    src="https://player.kick.com/shanrrr"
-                    width="100%"
-                    height="100%"
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                    title="Shanrrr Kick Stream"
-                  />
-                </div>
-                <div className="mt-3 sm:mt-4 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 shrink-0">
-                    <motion.div
-                      className="w-2 h-2 rounded-full bg-[#f472b6]"
-                      animate={{ opacity: [0.6, 1, 0.6] }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                    />
-                    <span className="text-xs sm:text-sm text-muted-foreground font-medium">Stream Status</span>
-                  </div>
-                  <Badge variant="secondary" className="bg-[#b07aff]/5 text-[#9487aa] border-[#b07aff]/10 text-[10px] sm:text-xs">
-                    Check Kick for updates
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-      </section>
+      <StreamSection />
 
       {/* Socials Section */}
       <SocialsSection />
