@@ -201,12 +201,16 @@ function InstagramIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-function PodiumCard({ player, rank, className }: { player: LeaderboardPlayer; rank: 1 | 2 | 3; className?: string }) {
-  const config = {
-    1: { color: "text-[#fdba74]", borderColor: "border-[#fdba74]/25", bgColor: "bg-[#fdba74]/10", icon: <Crown className="w-6 h-6 sm:w-7 sm:h-7 text-[#fdba74]" />, size: "w-12 h-12 sm:w-16 sm:h-16 text-lg sm:text-xl", label: "1st Place" },
-    2: { color: "text-[#b07aff]", borderColor: "border-[#b07aff]/20", bgColor: "bg-[#b07aff]/10", icon: <Medal className="w-5 h-5 sm:w-6 sm:h-6 text-[#b07aff]" />, size: "w-11 h-11 sm:w-14 sm:h-14 text-base sm:text-lg", label: "2nd Place" },
-    3: { color: "text-[#f472b6]", borderColor: "border-[#f472b6]/20", bgColor: "bg-[#f472b6]/10", icon: <Medal className="w-5 h-5 sm:w-6 sm:h-6 text-[#f472b6]" />, size: "w-11 h-11 sm:w-14 sm:h-14 text-base sm:text-lg", label: "3rd Place" },
-  }[rank];
+const podiumConfig: Record<number, { color: string; borderColor: string; bgColor: string; icon: React.ReactNode; size: string; label: string }> = {
+  1: { color: "text-[#fdba74]", borderColor: "border-[#fdba74]/25", bgColor: "bg-[#fdba74]/10", icon: <Crown className="w-6 h-6 sm:w-7 sm:h-7 text-[#fdba74]" />, size: "w-12 h-12 sm:w-16 sm:h-16 text-lg sm:text-xl", label: "1st Place" },
+  2: { color: "text-[#c0c0c0]", borderColor: "border-[#c0c0c0]/20", bgColor: "bg-[#c0c0c0]/10", icon: <Medal className="w-5 h-5 sm:w-6 sm:h-6 text-[#c0c0c0]" />, size: "w-11 h-11 sm:w-14 sm:h-14 text-base sm:text-lg", label: "2nd Place" },
+  3: { color: "text-[#cd7f32]", borderColor: "border-[#cd7f32]/20", bgColor: "bg-[#cd7f32]/10", icon: <Medal className="w-5 h-5 sm:w-6 sm:h-6 text-[#cd7f32]" />, size: "w-11 h-11 sm:w-14 sm:h-14 text-base sm:text-lg", label: "3rd Place" },
+  4: { color: "text-[#b07aff]", borderColor: "border-[#b07aff]/20", bgColor: "bg-[#b07aff]/10", icon: <Medal className="w-5 h-5 sm:w-6 sm:h-6 text-[#b07aff]" />, size: "w-10 h-10 sm:w-12 sm:h-12 text-sm sm:text-base", label: "4th Place" },
+  5: { color: "text-[#f472b6]", borderColor: "border-[#f472b6]/20", bgColor: "bg-[#f472b6]/10", icon: <Medal className="w-5 h-5 sm:w-6 sm:h-6 text-[#f472b6]" />, size: "w-10 h-10 sm:w-12 sm:h-12 text-sm sm:text-base", label: "5th Place" },
+};
+
+function PodiumCard({ player, rank, className }: { player: LeaderboardPlayer; rank: number; className?: string }) {
+  const config = podiumConfig[rank];
 
   return (
     <motion.div variants={bounceIn} className={className}>
@@ -216,7 +220,7 @@ function PodiumCard({ player, rank, className }: { player: LeaderboardPlayer; ra
             <Sparkles className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-5 h-5 text-[#fdba74] opacity-60" />
           )}
           <div className={`${config.size} rounded-full border-2 ${config.borderColor} flex items-center justify-center mx-auto mb-3`} style={{ background: `color-mix(in srgb, ${player.avatar} 15%, transparent)` }}>
-            <span className="font-bold" style={{ color: player.avatar }}>{player.name[0]}</span>
+            <span className="font-bold" style={{ color: player.avatar }}>{rank}</span>
           </div>
           <div className="flex justify-center mb-1">{config.icon}</div>
           <p className={`text-xs font-semibold ${config.color} mb-1 uppercase tracking-wider`}>{config.label}</p>
@@ -371,24 +375,20 @@ function LeaderboardTable({ leaderboardData }: { leaderboardData: LeaderboardPla
   const [search, setSearch] = useState("");
   const query = search.toLowerCase().trim();
 
-  // Skip top 3 (shown in podium) unless searching
+  // Skip top 5 (shown in podium) unless searching
   const displayData = query
     ? leaderboardData.filter((p) => p.name.toLowerCase().includes(query))
-    : leaderboardData.slice(3, 13);
+    : leaderboardData.slice(5, 15);
 
   const rowAccent = (rank: number) => {
     if (rank === 1) return { bg: "bg-gradient-to-r from-[#fdba74]/10 via-[#fdba74]/5 to-transparent", wager: "text-[#fdba74]", hover: "hover:from-[#fdba74]/15 hover:via-[#fdba74]/8 hover:to-transparent" };
-    if (rank === 2) return { bg: "bg-gradient-to-r from-[#b07aff]/10 via-[#b07aff]/5 to-transparent", wager: "text-[#b07aff]", hover: "hover:from-[#b07aff]/15 hover:via-[#b07aff]/8 hover:to-transparent" };
-    if (rank === 3) return { bg: "bg-gradient-to-r from-[#f472b6]/10 via-[#f472b6]/5 to-transparent", wager: "text-[#f472b6]", hover: "hover:from-[#f472b6]/15 hover:via-[#f472b6]/8 hover:to-transparent" };
+    if (rank === 2) return { bg: "bg-gradient-to-r from-[#c0c0c0]/10 via-[#c0c0c0]/5 to-transparent", wager: "text-[#c0c0c0]", hover: "hover:from-[#c0c0c0]/15 hover:via-[#c0c0c0]/8 hover:to-transparent" };
+    if (rank === 3) return { bg: "bg-gradient-to-r from-[#cd7f32]/10 via-[#cd7f32]/5 to-transparent", wager: "text-[#cd7f32]", hover: "hover:from-[#cd7f32]/15 hover:via-[#cd7f32]/8 hover:to-transparent" };
+    if (rank === 4) return { bg: "bg-gradient-to-r from-[#b07aff]/8 via-[#b07aff]/4 to-transparent", wager: "text-[#b07aff]", hover: "hover:from-[#b07aff]/12 hover:via-[#b07aff]/6 hover:to-transparent" };
+    if (rank === 5) return { bg: "bg-gradient-to-r from-[#f472b6]/8 via-[#f472b6]/4 to-transparent", wager: "text-[#f472b6]", hover: "hover:from-[#f472b6]/12 hover:via-[#f472b6]/6 hover:to-transparent" };
     return { bg: "", wager: "text-white/90", hover: "hover:bg-[#c084fc]/[0.05]" };
   };
 
-  const rankLabel = (rank: number) => {
-    if (rank === 1) return <Crown className="w-3.5 h-3.5 text-[#fdba74]" />;
-    if (rank === 2) return <Medal className="w-3.5 h-3.5 text-[#b07aff]" />;
-    if (rank === 3) return <Medal className="w-3.5 h-3.5 text-[#f472b6]" />;
-    return null;
-  };
 
   return (
     <>
@@ -430,9 +430,6 @@ function LeaderboardTable({ leaderboardData }: { leaderboardData: LeaderboardPla
                     className={`grid grid-cols-[1fr_auto] items-center px-4 sm:px-5 py-2.5 sm:py-3 transition-all duration-200 ${accent.bg} ${accent.hover}`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-[11px] sm:text-xs font-bold text-[#9487aa] w-5 text-center shrink-0">
-                        {rankLabel(player.rank) || player.rank}
-                      </span>
                       <div
                         className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 border text-[11px] sm:text-xs font-bold"
                         style={{
@@ -441,7 +438,7 @@ function LeaderboardTable({ leaderboardData }: { leaderboardData: LeaderboardPla
                           color: player.avatar,
                         }}
                       >
-                        {player.name[0]?.toUpperCase()}
+                        {player.rank}
                       </div>
                       <span className={`font-semibold text-xs sm:text-sm truncate ${player.rank <= 3 ? "text-white" : "text-[#f0eaf8]/80"}`}>
                         {player.name}
@@ -714,13 +711,25 @@ export default function Home() {
           {/* Top 3 Podium */}
           {leaderboardData.length >= 3 && (
             <motion.div
-              className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-10 items-end"
+              className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6 items-end"
               initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-50px" }}
               variants={staggerContainer}
             >
               <PodiumCard player={leaderboardData[1]} rank={2} className="order-1 pt-10 sm:pt-12" />
               <PodiumCard player={leaderboardData[0]} rank={1} className="order-first sm:order-2 pt-0" />
               <PodiumCard player={leaderboardData[2]} rank={3} className="order-3 pt-16 sm:pt-20" />
+            </motion.div>
+          )}
+
+          {/* 4th & 5th Place */}
+          {leaderboardData.length >= 5 && (
+            <motion.div
+              className="grid grid-cols-2 gap-2 sm:gap-4 mb-8 sm:mb-10 max-w-md mx-auto"
+              initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-50px" }}
+              variants={staggerContainer}
+            >
+              <PodiumCard player={leaderboardData[3]} rank={4} />
+              <PodiumCard player={leaderboardData[4]} rank={5} />
             </motion.div>
           )}
 
