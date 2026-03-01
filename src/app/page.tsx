@@ -31,33 +31,42 @@ const TIKTOK_URL = "#";
 
 const profileColors = ["#fdba74", "#b07aff", "#f472b6", "#7dd3fc", "#6ee7b7", "#ff6b6b", "#fbbf24", "#a78bfa", "#34d399", "#fb923c"];
 
-const leaderboardData = [
-  { rank: 1, name: "xStarDust", wager: "$284,200", avatar: profileColors[0] },
-  { rank: 2, name: "CozyPanda99", wager: "$251,800", avatar: profileColors[1] },
-  { rank: 3, name: "PixelQueen", wager: "$239,400", avatar: profileColors[2] },
-  { rank: 4, name: "LuckyClover", wager: "$198,600", avatar: profileColors[3] },
-  { rank: 5, name: "MoonBeam", wager: "$176,300", avatar: profileColors[4] },
-  { rank: 6, name: "BubbleTea", wager: "$154,800", avatar: profileColors[5] },
-  { rank: 7, name: "SparkleKid", wager: "$138,200", avatar: profileColors[6] },
-  { rank: 8, name: "CloudNine", wager: "$121,500", avatar: profileColors[7] },
-  { rank: 9, name: "SunnyDaze", wager: "$108,900", avatar: profileColors[8] },
-  { rank: 10, name: "JellyBean", wager: "$94,200", avatar: profileColors[9] },
-  { rank: 11, name: "NeonRider", wager: "$87,400", avatar: profileColors[0] },
-  { rank: 12, name: "CherryBomb", wager: "$82,100", avatar: profileColors[1] },
-  { rank: 13, name: "FrostyMint", wager: "$76,800", avatar: profileColors[2] },
-  { rank: 14, name: "ThunderCat", wager: "$71,300", avatar: profileColors[3] },
-  { rank: 15, name: "VelvetRose", wager: "$65,900", avatar: profileColors[4] },
-  { rank: 16, name: "CosmicDust", wager: "$61,200", avatar: profileColors[5] },
-  { rank: 17, name: "WildFox", wager: "$57,400", avatar: profileColors[6] },
-  { rank: 18, name: "PixelDream", wager: "$52,800", avatar: profileColors[7] },
-  { rank: 19, name: "GoldenAce", wager: "$48,300", avatar: profileColors[8] },
-  { rank: 20, name: "LunarWolf", wager: "$44,100", avatar: profileColors[9] },
-  { rank: 21, name: "StormChaser", wager: "$40,600", avatar: profileColors[0] },
-  { rank: 22, name: "DaisyChain", wager: "$37,200", avatar: profileColors[1] },
-  { rank: 23, name: "IronPulse", wager: "$33,800", avatar: profileColors[2] },
-  { rank: 24, name: "CrystalWave", wager: "$30,500", avatar: profileColors[3] },
-  { rank: 25, name: "BlazeFury", wager: "$27,900", avatar: profileColors[4] },
-];
+interface LeaderboardPlayer {
+  rank: number;
+  name: string;
+  wager: string;
+  avatar: string;
+}
+
+function formatCents(cents: number): string {
+  return "$" + (cents / 100).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function useDatDropLeaderboard() {
+  const [data, setData] = useState<LeaderboardPlayer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/leaderboard")
+      .then((r) => r.json())
+      .then((raw: { steamid: string; nickname: string; total_wagered: number }[]) => {
+        if (!Array.isArray(raw)) { setLoading(false); return; }
+        const sorted = raw.sort((a, b) => b.total_wagered - a.total_wagered);
+        setData(
+          sorted.map((p, i) => ({
+            rank: i + 1,
+            name: p.nickname,
+            wager: formatCents(p.total_wagered),
+            avatar: profileColors[i % profileColors.length],
+          }))
+        );
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  return { data, loading };
+}
 
 const communityStats = [
   { icon: Clock, label: "Watch Hours", value: "24,580", color: "text-[#b07aff]", bg: "bg-[#b07aff]/10" },
@@ -169,7 +178,7 @@ function InstagramIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-function PodiumCard({ player, rank, className }: { player: typeof leaderboardData[0]; rank: 1 | 2 | 3; className?: string }) {
+function PodiumCard({ player, rank, className }: { player: LeaderboardPlayer; rank: 1 | 2 | 3; className?: string }) {
   const config = {
     1: { color: "text-[#fdba74]", borderColor: "border-[#fdba74]/25", bgColor: "bg-[#fdba74]/10", icon: <Crown className="w-6 h-6 sm:w-7 sm:h-7 text-[#fdba74]" />, size: "w-12 h-12 sm:w-16 sm:h-16 text-lg sm:text-xl", label: "1st Place" },
     2: { color: "text-[#b07aff]", borderColor: "border-[#b07aff]/20", bgColor: "bg-[#b07aff]/10", icon: <Medal className="w-5 h-5 sm:w-6 sm:h-6 text-[#b07aff]" />, size: "w-11 h-11 sm:w-14 sm:h-14 text-base sm:text-lg", label: "2nd Place" },
@@ -335,7 +344,7 @@ function StreamSection({ kickStatus }: { kickStatus: KickStatus }) {
   );
 }
 
-function LeaderboardTable() {
+function LeaderboardTable({ leaderboardData }: { leaderboardData: LeaderboardPlayer[] }) {
   const [search, setSearch] = useState("");
   const query = search.toLowerCase().trim();
 
@@ -561,6 +570,7 @@ function SocialsSection() {
 
 export default function Home() {
   const kickStatus = useKickStatus();
+  const { data: leaderboardData, loading: lbLoading } = useDatDropLeaderboard();
 
   return (
     <main className="min-h-screen relative z-10">
@@ -676,18 +686,29 @@ export default function Home() {
           </div>
 
           {/* Top 3 Podium */}
-          <motion.div
-            className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-10 items-end"
-            initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-50px" }}
-            variants={staggerContainer}
-          >
-            <PodiumCard player={leaderboardData[1]} rank={2} className="order-1 pt-10 sm:pt-12" />
-            <PodiumCard player={leaderboardData[0]} rank={1} className="order-first sm:order-2 pt-0" />
-            <PodiumCard player={leaderboardData[2]} rank={3} className="order-3 pt-16 sm:pt-20" />
-          </motion.div>
+          {leaderboardData.length >= 3 && (
+            <motion.div
+              className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-10 items-end"
+              initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-50px" }}
+              variants={staggerContainer}
+            >
+              <PodiumCard player={leaderboardData[1]} rank={2} className="order-1 pt-10 sm:pt-12" />
+              <PodiumCard player={leaderboardData[0]} rank={1} className="order-first sm:order-2 pt-0" />
+              <PodiumCard player={leaderboardData[2]} rank={3} className="order-3 pt-16 sm:pt-20" />
+            </motion.div>
+          )}
 
           {/* Search + Leaderboard Table */}
-          <LeaderboardTable />
+          {lbLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center gap-2 text-[#9487aa] text-sm">
+                <div className="w-4 h-4 border-2 border-[#c084fc]/30 border-t-[#c084fc] rounded-full animate-spin" />
+                Loading leaderboard...
+              </div>
+            </div>
+          ) : (
+            <LeaderboardTable leaderboardData={leaderboardData} />
+          )}
         </div>
       </section>
 
