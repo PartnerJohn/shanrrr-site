@@ -390,6 +390,8 @@ function LeaderboardTable({ leaderboardData }: { leaderboardData: LeaderboardPla
   };
 
 
+  const hasTableRows = !query && displayData.length === 0;
+
   return (
     <>
       <div className="mb-4 max-w-xs mx-auto relative px-1">
@@ -402,64 +404,71 @@ function LeaderboardTable({ leaderboardData }: { leaderboardData: LeaderboardPla
         />
       </div>
 
-      <motion.div
-        key={query || "default"}
-        initial="hidden"
-        animate="visible"
-        variants={staggerContainer}
-      >
-        <Card className="bg-[#2a2438]/60 backdrop-blur-xl border-[#c084fc]/12 rounded-2xl overflow-hidden relative shadow-[0_4px_40px_rgba(192,132,252,0.06),0_8px_80px_rgba(192,132,252,0.03),inset_0_1px_1px_rgba(255,255,255,0.04)] max-w-2xl mx-auto">
-          <div className="grid grid-cols-[1fr_auto] px-4 sm:px-5 py-3 text-[#9487aa] text-xs sm:text-sm font-medium">
-            <span>Player</span>
-            <span>Wagered</span>
-          </div>
-          <div className="h-px bg-gradient-to-r from-transparent via-[#c084fc]/30 to-transparent" />
-
-          <div className="divide-y divide-[#c084fc]/[0.06]">
-            {displayData.length === 0 ? (
-              <div className="text-center text-sm text-[#6b5f7e] py-8">
-                No players found for &ldquo;{search}&rdquo;
-              </div>
-            ) : (
-              displayData.map((player) => {
-                const accent = rowAccent(player.rank);
-                return (
-                  <motion.div
-                    key={player.rank}
-                    variants={staggerItem}
-                    className={`grid grid-cols-[1fr_auto] items-center px-4 sm:px-5 py-2.5 sm:py-3 transition-all duration-200 ${accent.bg} ${accent.hover}`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 border text-[11px] sm:text-xs font-bold"
-                        style={{
-                          background: `color-mix(in srgb, ${player.avatar} 18%, transparent)`,
-                          borderColor: `color-mix(in srgb, ${player.avatar} 30%, transparent)`,
-                          color: player.avatar,
-                        }}
-                      >
-                        {player.rank}
-                      </div>
-                      <span className={`font-semibold text-xs sm:text-sm truncate ${player.rank <= 3 ? "text-white" : "text-[#f0eaf8]/80"}`}>
-                        {player.name}
-                      </span>
-                    </div>
-                    <span className={`font-bold text-xs sm:text-sm tabular-nums ${accent.wager}`}>
-                      {player.wager}
-                    </span>
-                  </motion.div>
-                );
-              })
-            )}
-          </div>
-
-          {!query && leaderboardData.length > 13 && (
-            <div className="text-center py-2.5 text-[10px] sm:text-xs text-[#6b5f7e] border-t border-[#c084fc]/[0.06]">
-              Search to find your rank
+      {/* If no rows beyond podium and not searching, just show a message */}
+      {hasTableRows ? (
+        <p className="text-center text-xs sm:text-sm text-[#6b5f7e] py-4">
+          Search your name if not on this list
+        </p>
+      ) : (
+        <motion.div
+          key={query || "default"}
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+        >
+          <Card className="bg-[#2a2438]/60 backdrop-blur-xl border-[#c084fc]/12 rounded-2xl overflow-hidden relative shadow-[0_4px_40px_rgba(192,132,252,0.06),0_8px_80px_rgba(192,132,252,0.03),inset_0_1px_1px_rgba(255,255,255,0.04)] max-w-2xl mx-auto">
+            <div className="grid grid-cols-[1fr_auto] px-4 sm:px-5 py-3 text-[#9487aa] text-xs sm:text-sm font-medium">
+              <span>Player</span>
+              <span>Wagered</span>
             </div>
-          )}
-        </Card>
-      </motion.div>
+            <div className="h-px bg-gradient-to-r from-transparent via-[#c084fc]/30 to-transparent" />
+
+            <div className="divide-y divide-[#c084fc]/[0.06]">
+              {displayData.length === 0 ? (
+                <div className="text-center text-sm text-[#6b5f7e] py-8">
+                  No players found for &ldquo;{search}&rdquo;
+                </div>
+              ) : (
+                displayData.map((player) => {
+                  const accent = rowAccent(player.rank);
+                  return (
+                    <motion.div
+                      key={player.rank}
+                      variants={staggerItem}
+                      className={`grid grid-cols-[1fr_auto] items-center px-4 sm:px-5 py-2.5 sm:py-3 transition-all duration-200 ${accent.bg} ${accent.hover}`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 border text-[11px] sm:text-xs font-bold"
+                          style={{
+                            background: `color-mix(in srgb, ${player.avatar} 18%, transparent)`,
+                            borderColor: `color-mix(in srgb, ${player.avatar} 30%, transparent)`,
+                            color: player.avatar,
+                          }}
+                        >
+                          {player.rank}
+                        </div>
+                        <span className={`font-semibold text-xs sm:text-sm truncate ${player.rank <= 5 ? "text-white" : "text-[#f0eaf8]/80"}`}>
+                          {player.name}
+                        </span>
+                      </div>
+                      <span className={`font-bold text-xs sm:text-sm tabular-nums ${accent.wager}`}>
+                        {player.wager}
+                      </span>
+                    </motion.div>
+                  );
+                })
+              )}
+            </div>
+
+            {!query && leaderboardData.length > 15 && (
+              <div className="text-center py-2.5 text-[10px] sm:text-xs text-[#6b5f7e] border-t border-[#c084fc]/[0.06]">
+                Search to find your rank
+              </div>
+            )}
+          </Card>
+        </motion.div>
+      )}
     </>
   );
 }
