@@ -7,15 +7,10 @@ import {
   Search, Tv, ExternalLink, ChevronDown, Sparkles,
   MessageSquare, Heart, Zap,
 } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table, TableBody, TableCell, TableHead,
-  TableHeader, TableRow,
-} from "@/components/ui/table";
 
 import { Gift } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -75,7 +70,35 @@ const communityStats = [
   { icon: Eye, label: "Peak Viewers", value: "486", color: "text-[#6ee7b7]", bg: "bg-[#6ee7b7]/10" },
 ];
 
-const casinoSites = ["Gamba", "DatDrop", "SkinWaste"];
+const casinoSites = ["Gamba", "DatDrop", "SkinWaste"] as const;
+type CasinoSite = typeof casinoSites[number];
+
+const placeholderData: Record<"Gamba" | "SkinWaste", LeaderboardPlayer[]> = {
+  Gamba: [
+    { rank: 1, name: "xStarDust", wager: "$284,200", avatar: profileColors[0] },
+    { rank: 2, name: "CozyPanda99", wager: "$251,800", avatar: profileColors[1] },
+    { rank: 3, name: "PixelQueen", wager: "$239,400", avatar: profileColors[2] },
+    { rank: 4, name: "LuckyClover", wager: "$198,600", avatar: profileColors[3] },
+    { rank: 5, name: "MoonBeam", wager: "$176,300", avatar: profileColors[4] },
+    { rank: 6, name: "BubbleTea", wager: "$154,800", avatar: profileColors[5] },
+    { rank: 7, name: "SparkleKid", wager: "$138,200", avatar: profileColors[6] },
+    { rank: 8, name: "CloudNine", wager: "$121,500", avatar: profileColors[7] },
+    { rank: 9, name: "SunnyDaze", wager: "$108,900", avatar: profileColors[8] },
+    { rank: 10, name: "JellyBean", wager: "$94,200", avatar: profileColors[9] },
+  ],
+  SkinWaste: [
+    { rank: 1, name: "NeonRider", wager: "$192,400", avatar: profileColors[5] },
+    { rank: 2, name: "CherryBomb", wager: "$168,100", avatar: profileColors[6] },
+    { rank: 3, name: "FrostyMint", wager: "$143,800", avatar: profileColors[7] },
+    { rank: 4, name: "ThunderCat", wager: "$121,300", avatar: profileColors[8] },
+    { rank: 5, name: "VelvetRose", wager: "$98,900", avatar: profileColors[9] },
+    { rank: 6, name: "CosmicDust", wager: "$81,200", avatar: profileColors[0] },
+    { rank: 7, name: "WildFox", wager: "$67,400", avatar: profileColors[1] },
+    { rank: 8, name: "PixelDream", wager: "$52,800", avatar: profileColors[2] },
+    { rank: 9, name: "GoldenAce", wager: "$41,300", avatar: profileColors[3] },
+    { rank: 10, name: "LunarWolf", wager: "$34,100", avatar: profileColors[4] },
+  ],
+};
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -348,27 +371,34 @@ function LeaderboardTable({ leaderboardData }: { leaderboardData: LeaderboardPla
   const [search, setSearch] = useState("");
   const query = search.toLowerCase().trim();
 
-  // Show top 10 by default, or filtered results when searching
+  // Skip top 3 (shown in podium) unless searching
   const displayData = query
     ? leaderboardData.filter((p) => p.name.toLowerCase().includes(query))
-    : leaderboardData.slice(0, 10);
+    : leaderboardData.slice(3, 13);
 
   const rowAccent = (rank: number) => {
-    if (rank === 1) return { bg: "bg-gradient-to-r from-[#fdba74]/10 via-[#fdba74]/5 to-transparent", border: "border-[#fdba74]/20", wager: "text-[#fdba74]", hover: "hover:from-[#fdba74]/15 hover:via-[#fdba74]/8 hover:to-transparent" };
-    if (rank === 2) return { bg: "bg-gradient-to-r from-[#b07aff]/10 via-[#b07aff]/5 to-transparent", border: "border-[#b07aff]/20", wager: "text-[#b07aff]", hover: "hover:from-[#b07aff]/15 hover:via-[#b07aff]/8 hover:to-transparent" };
-    if (rank === 3) return { bg: "bg-gradient-to-r from-[#f472b6]/10 via-[#f472b6]/5 to-transparent", border: "border-[#f472b6]/20", wager: "text-[#f472b6]", hover: "hover:from-[#f472b6]/15 hover:via-[#f472b6]/8 hover:to-transparent" };
-    return { bg: "", border: "border-transparent", wager: "text-white", hover: "hover:bg-[#c084fc]/[0.05]" };
+    if (rank === 1) return { bg: "bg-gradient-to-r from-[#fdba74]/10 via-[#fdba74]/5 to-transparent", wager: "text-[#fdba74]", hover: "hover:from-[#fdba74]/15 hover:via-[#fdba74]/8 hover:to-transparent" };
+    if (rank === 2) return { bg: "bg-gradient-to-r from-[#b07aff]/10 via-[#b07aff]/5 to-transparent", wager: "text-[#b07aff]", hover: "hover:from-[#b07aff]/15 hover:via-[#b07aff]/8 hover:to-transparent" };
+    if (rank === 3) return { bg: "bg-gradient-to-r from-[#f472b6]/10 via-[#f472b6]/5 to-transparent", wager: "text-[#f472b6]", hover: "hover:from-[#f472b6]/15 hover:via-[#f472b6]/8 hover:to-transparent" };
+    return { bg: "", wager: "text-white/90", hover: "hover:bg-[#c084fc]/[0.05]" };
+  };
+
+  const rankLabel = (rank: number) => {
+    if (rank === 1) return <Crown className="w-3.5 h-3.5 text-[#fdba74]" />;
+    if (rank === 2) return <Medal className="w-3.5 h-3.5 text-[#b07aff]" />;
+    if (rank === 3) return <Medal className="w-3.5 h-3.5 text-[#f472b6]" />;
+    return null;
   };
 
   return (
     <>
-      <div className="mb-4 max-w-sm mx-auto relative px-1">
+      <div className="mb-4 max-w-xs mx-auto relative px-1">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9487aa]" />
         <Input
           placeholder="Search your name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 rounded-xl bg-[#2a2438]/60 backdrop-blur-xl border-[#c084fc]/10 text-white placeholder:text-[#6b5f7e] focus-visible:ring-2 focus-visible:ring-[#f472b6]/25 focus-visible:border-[#c084fc]/30 transition-shadow"
+          className="pl-10 rounded-xl bg-[#2a2438]/60 backdrop-blur-xl border-[#c084fc]/10 text-sm text-white placeholder:text-[#6b5f7e] focus-visible:ring-2 focus-visible:ring-[#f472b6]/25 focus-visible:border-[#c084fc]/30 transition-shadow"
         />
       </div>
 
@@ -378,67 +408,57 @@ function LeaderboardTable({ leaderboardData }: { leaderboardData: LeaderboardPla
         animate="visible"
         variants={staggerContainer}
       >
-        <Card className="bg-[#2a2438]/60 backdrop-blur-xl border-[#c084fc]/12 rounded-2xl overflow-hidden relative shadow-[0_4px_40px_rgba(192,132,252,0.06),0_8px_80px_rgba(192,132,252,0.03),inset_0_1px_1px_rgba(255,255,255,0.04)]">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b-0 hover:bg-transparent">
-                  <TableHead className="text-[#9487aa] text-xs sm:text-sm py-3.5">Player</TableHead>
-                  <TableHead className="text-[#9487aa] text-right text-xs sm:text-sm py-3.5">Wagered</TableHead>
-                </TableRow>
-              </TableHeader>
-              {/* Gradient line below header */}
-              <tr><td colSpan={2} className="p-0"><div className="h-px bg-gradient-to-r from-transparent via-[#c084fc]/30 to-transparent" /></td></tr>
-              <TableBody>
-                {displayData.length === 0 ? (
-                  <tr>
-                    <TableCell colSpan={2} className="text-center text-sm text-[#6b5f7e] py-8">
-                      No players found for &ldquo;{search}&rdquo;
-                    </TableCell>
-                  </tr>
-                ) : (
-                  displayData.map((player) => {
-                    const accent = rowAccent(player.rank);
-                    return (
-                      <motion.tr
-                        key={player.rank}
-                        variants={staggerItem}
-                        className={`border-b border-[#c084fc]/[0.06] transition-all duration-200 ${accent.bg} ${accent.hover}`}
+        <Card className="bg-[#2a2438]/60 backdrop-blur-xl border-[#c084fc]/12 rounded-2xl overflow-hidden relative shadow-[0_4px_40px_rgba(192,132,252,0.06),0_8px_80px_rgba(192,132,252,0.03),inset_0_1px_1px_rgba(255,255,255,0.04)] max-w-2xl mx-auto">
+          <div className="grid grid-cols-[1fr_auto] px-4 sm:px-5 py-3 text-[#9487aa] text-xs sm:text-sm font-medium">
+            <span>Player</span>
+            <span>Wagered</span>
+          </div>
+          <div className="h-px bg-gradient-to-r from-transparent via-[#c084fc]/30 to-transparent" />
+
+          <div className="divide-y divide-[#c084fc]/[0.06]">
+            {displayData.length === 0 ? (
+              <div className="text-center text-sm text-[#6b5f7e] py-8">
+                No players found for &ldquo;{search}&rdquo;
+              </div>
+            ) : (
+              displayData.map((player) => {
+                const accent = rowAccent(player.rank);
+                return (
+                  <motion.div
+                    key={player.rank}
+                    variants={staggerItem}
+                    className={`grid grid-cols-[1fr_auto] items-center px-4 sm:px-5 py-2.5 sm:py-3 transition-all duration-200 ${accent.bg} ${accent.hover}`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="text-[11px] sm:text-xs font-bold text-[#9487aa] w-5 text-center shrink-0">
+                        {rankLabel(player.rank) || player.rank}
+                      </span>
+                      <div
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 border text-[11px] sm:text-xs font-bold"
+                        style={{
+                          background: `color-mix(in srgb, ${player.avatar} 18%, transparent)`,
+                          borderColor: `color-mix(in srgb, ${player.avatar} 30%, transparent)`,
+                          color: player.avatar,
+                        }}
                       >
-                        <TableCell className="py-3 sm:py-3.5">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-bold shrink-0 border ring-1"
-                              style={{
-                                background: `color-mix(in srgb, ${player.avatar} 20%, transparent)`,
-                                borderColor: `color-mix(in srgb, ${player.avatar} 35%, transparent)`,
-                                boxShadow: player.rank <= 3 ? `0 0 12px color-mix(in srgb, ${player.avatar} 15%, transparent)` : 'none',
-                                color: player.avatar,
-                                // @ts-expect-error ring color via style
-                                '--tw-ring-color': `color-mix(in srgb, ${player.avatar} 20%, transparent)`,
-                              }}
-                            >
-                              {player.rank}
-                            </div>
-                            <div className="min-w-0">
-                              <span className={`font-semibold text-xs sm:text-sm block ${player.rank <= 3 ? "text-white" : "text-[#f0eaf8]/80"}`}>
-                                {player.name}
-                              </span>
-                              <span className="text-[10px] sm:text-xs text-[#9487aa] block sm:hidden">{player.wager}</span>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className={`text-right font-bold text-xs sm:text-sm py-3 sm:py-3.5 ${accent.wager}`}>
-                          {player.wager}
-                        </TableCell>
-                      </motion.tr>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          {!query && (
-            <div className="text-center py-3 text-[10px] sm:text-xs text-[#6b5f7e] border-t border-[#c084fc]/[0.06]">
-              Showing top 10 — search to find your rank
+                        {player.name[0]?.toUpperCase()}
+                      </div>
+                      <span className={`font-semibold text-xs sm:text-sm truncate ${player.rank <= 3 ? "text-white" : "text-[#f0eaf8]/80"}`}>
+                        {player.name}
+                      </span>
+                    </div>
+                    <span className={`font-bold text-xs sm:text-sm tabular-nums ${accent.wager}`}>
+                      {player.wager}
+                    </span>
+                  </motion.div>
+                );
+              })
+            )}
+          </div>
+
+          {!query && leaderboardData.length > 13 && (
+            <div className="text-center py-2.5 text-[10px] sm:text-xs text-[#6b5f7e] border-t border-[#c084fc]/[0.06]">
+              Search to find your rank
             </div>
           )}
         </Card>
@@ -570,7 +590,11 @@ function SocialsSection() {
 
 export default function Home() {
   const kickStatus = useKickStatus();
-  const { data: leaderboardData, loading: lbLoading } = useDatDropLeaderboard();
+  const { data: datdropData, loading: lbLoading } = useDatDropLeaderboard();
+  const [activeSite, setActiveSite] = useState<CasinoSite>("DatDrop");
+
+  const leaderboardData = activeSite === "DatDrop" ? datdropData : placeholderData[activeSite];
+  const isLoading = activeSite === "DatDrop" && lbLoading;
 
   return (
     <main className="min-h-screen relative z-10">
@@ -658,19 +682,21 @@ export default function Home() {
 
           {/* Casino Site Tabs */}
           <div className="flex justify-center mb-4">
-            <Tabs defaultValue="gamba">
-              <TabsList className="bg-[#231e30]/50 backdrop-blur-lg border border-[#c084fc]/10">
-                {casinoSites.map((site) => (
-                  <TabsTrigger
-                    key={site}
-                    value={site.toLowerCase().replace(" ", "-")}
-                    className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#c084fc] data-[state=active]:to-[#f472b6] data-[state=active]:text-white data-[state=active]:shadow-[0_2px_12px_rgba(192,132,252,0.3)] text-[#9487aa]"
-                  >
-                    {site}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+            <div className="inline-flex bg-[#231e30]/50 backdrop-blur-lg border border-[#c084fc]/10 rounded-lg p-1 gap-1">
+              {casinoSites.map((site) => (
+                <button
+                  key={site}
+                  onClick={() => setActiveSite(site)}
+                  className={`px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    activeSite === site
+                      ? "bg-gradient-to-r from-[#c084fc] to-[#f472b6] text-white shadow-[0_2px_12px_rgba(192,132,252,0.3)]"
+                      : "text-[#9487aa] hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  {site}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Monthly + Countdown */}
@@ -699,7 +725,7 @@ export default function Home() {
           )}
 
           {/* Search + Leaderboard Table */}
-          {lbLoading ? (
+          {isLoading ? (
             <div className="text-center py-12">
               <div className="inline-flex items-center gap-2 text-[#9487aa] text-sm">
                 <div className="w-4 h-4 border-2 border-[#c084fc]/30 border-t-[#c084fc] rounded-full animate-spin" />
