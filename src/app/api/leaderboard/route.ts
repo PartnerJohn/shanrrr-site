@@ -26,46 +26,59 @@ async function getToken(): Promise<string> {
   return data.access_token;
 }
 
+async function fetchStats(token: string, from: string, to: string) {
+  const res = await fetch(`${STATS_URL}?from_date=${from}&to_date=${to}`, {
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    // Token might be expired, clear cache and retry once
+    cachedToken = null;
+    const newToken = await getToken();
+    const retry = await fetch(`${STATS_URL}?from_date=${from}&to_date=${to}`, {
+      headers: {
+        "Accept": "application/json",
+        "Authorization": `Bearer ${newToken}`,
+      },
+    });
+    if (!retry.ok) throw new Error(`Stats fetch failed: ${retry.status}`);
+    return retry.json();
+  }
+
+  return res.json();
+}
+
 export async function GET() {
   try {
     const token = await getToken();
+    const now = new Date();
 
     // Current month date range
-    const now = new Date();
     const from = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     const to = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
 
-    const res = await fetch(`${STATS_URL}?from_date=${from}&to_date=${to}`, {
-      headers: {
-        "Accept": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
+    let data = await fetchStats(token, from, to);
+    let month = "current";
 
-    if (!res.ok) {
-      // Token might be expired, clear cache and retry once
-      cachedToken = null;
-      const newToken = await getToken();
-      const retry = await fetch(`${STATS_URL}?from_date=${from}&to_date=${to}`, {
-        headers: {
-          "Accept": "application/json",
-          "Authorization": `Bearer ${newToken}`,
-        },
-      });
-      if (!retry.ok) throw new Error(`Stats fetch failed: ${retry.status}`);
-      const data = await retry.json();
-      return NextResponse.json(data, {
-        headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
-      });
+    // If current month is empty, fall back to previous month
+    if (Array.isArray(data) && data.length === 0) {
+      const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const prevFrom = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, "0")}-01`;
+      const prevLastDay = new Date(prev.getFullYear(), prev.getMonth() + 1, 0).getDate();
+      const prevTo = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, "0")}-${String(prevLastDay).padStart(2, "0")}`;
+      data = await fetchStats(token, prevFrom, prevTo);
+      month = "previous";
     }
 
-    const data = await res.json();
-    return NextResponse.json(data, {
+    return NextResponse.json({ players: data, month }, {
       headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
     });
   } catch (err) {
     console.error("DatDrop API error:", err);
-    return NextResponse.json([], { status: 500 });
+    return NextResponse.json({ players: [], month: "current" }, { status: 500 });
   }
 }

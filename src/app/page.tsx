@@ -40,12 +40,15 @@ function formatCents(cents: number): string {
 function useDatDropLeaderboard() {
   const [data, setData] = useState<LeaderboardPlayer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [month, setMonth] = useState<"current" | "previous">("current");
 
   useEffect(() => {
     fetch("/api/leaderboard")
       .then((r) => r.json())
-      .then((raw: { steamid: string; nickname: string; total_wagered: number }[]) => {
+      .then((res: { players: { steamid: string; nickname: string; total_wagered: number }[]; month: string }) => {
+        const raw = res.players ?? res;
         if (!Array.isArray(raw)) { setLoading(false); return; }
+        if (res.month) setMonth(res.month as "current" | "previous");
         const sorted = raw.sort((a, b) => b.total_wagered - a.total_wagered);
         setData(
           sorted.map((p, i) => ({
@@ -60,7 +63,7 @@ function useDatDropLeaderboard() {
       .catch(() => setLoading(false));
   }, []);
 
-  return { data, loading };
+  return { data, loading, month };
 }
 
 const communityStats = [
@@ -127,23 +130,42 @@ const bounceIn = {
 };
 
 function CountdownTimer() {
-  // Counts down to end of current month
-  const now = new Date();
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-  const diff = endOfMonth.getTime() - now.getTime();
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, ended: false });
+
+  useEffect(() => {
+    function calc() {
+      // Use EST (America/New_York) for consistent timezone
+      const estNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+      const endOfMonth = new Date(estNow.getFullYear(), estNow.getMonth() + 1, 0, 23, 59, 59);
+      const diff = endOfMonth.getTime() - estNow.getTime();
+      if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, ended: true };
+      return {
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+        ended: false,
+      };
+    }
+    setTimeLeft(calc());
+    const id = setInterval(() => setTimeLeft(calc()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (timeLeft.ended) {
+    return <span className="text-[#f472b6] font-semibold text-sm">Month ended!</span>;
+  }
 
   return (
     <div className="flex items-center gap-1">
       {[
-        { val: days, label: "d" },
-        { val: hours, label: "h" },
-        { val: minutes, label: "m" },
+        { val: timeLeft.days, label: "d" },
+        { val: timeLeft.hours, label: "h" },
+        { val: timeLeft.minutes, label: "m" },
+        { val: timeLeft.seconds, label: "s" },
       ].map(({ val, label }) => (
         <span key={label} className="bg-[#2a2438]/60 backdrop-blur-sm border border-[#b07aff]/10 rounded-md px-2 py-0.5 text-white font-mono font-bold text-sm">
-          {val}<span className="text-[#9487aa] text-xs ml-0.5">{label}</span>
+          {String(val).padStart(2, "0")}<span className="text-[#9487aa] text-xs ml-0.5">{label}</span>
         </span>
       ))}
     </div>
@@ -296,7 +318,7 @@ function StreamSection({ kickStatus }: { kickStatus: KickStatus }) {
       <div className="max-w-4xl mx-auto">
         <motion.div
           className="text-center mb-8 sm:mb-12"
-          initial="hidden" whileInView="visible" viewport={{ once: false }}
+          initial="hidden" whileInView="visible" viewport={{ once: true }}
           variants={bounceIn}
         >
           <div className="inline-flex items-baseline justify-center gap-2 mb-2">
@@ -314,7 +336,7 @@ function StreamSection({ kickStatus }: { kickStatus: KickStatus }) {
           </p>
         </motion.div>
 
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: false }} variants={bounceIn}>
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={bounceIn}>
           <Card className={`bg-[#2a2438]/60 backdrop-blur-xl rounded-2xl relative overflow-hidden transition-all duration-500 ${
             kickStatus.is_live
               ? "border-[#f472b6]/30 shadow-[0_0_30px_rgba(244,114,182,0.15)]"
@@ -518,7 +540,7 @@ function SocialsSection() {
       <div className="max-w-4xl mx-auto">
         <motion.div
           className="text-center mb-8"
-          initial="hidden" whileInView="visible" viewport={{ once: false }}
+          initial="hidden" whileInView="visible" viewport={{ once: true }}
           variants={bounceIn}
         >
           <h2 className="text-2xl sm:text-3xl font-bold gradient-text-full inline-block">Join the Community</h2>
@@ -527,7 +549,7 @@ function SocialsSection() {
 
         <motion.div
           className="flex items-center justify-center gap-2"
-          initial="hidden" whileInView="visible" viewport={{ once: false }}
+          initial="hidden" whileInView="visible" viewport={{ once: true }}
           variants={staggerContainer}
         >
           {socials.map(({ name, iconSmall, accent }) => (
@@ -596,7 +618,7 @@ function SocialsSection() {
 
 export default function Home() {
   const kickStatus = useKickStatus();
-  const { data: datdropData, loading: lbLoading } = useDatDropLeaderboard();
+  const { data: datdropData, loading: lbLoading, month: lbMonth } = useDatDropLeaderboard();
   const [activeSite, setActiveSite] = useState<CasinoSite>("DatDrop");
 
   const leaderboardData = activeSite === "DatDrop" ? datdropData : placeholderData[activeSite];
@@ -664,14 +686,14 @@ export default function Home() {
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
             className="text-center mb-8 sm:mb-10"
-            initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-100px" }}
+            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
             variants={bounceIn}
           >
             <motion.div
               className="inline-flex items-center gap-2 text-[#c084fc] mb-3"
               initial={{ scale: 0.8, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: false }}
+              viewport={{ once: true }}
               transition={{ type: "spring", stiffness: 300, damping: 15 }}
             >
               <Trophy className="w-5 h-5" />
@@ -681,7 +703,7 @@ export default function Home() {
               className="text-2xl sm:text-4xl font-bold text-white"
               initial={{ scale: 0.8, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: false }}
+              viewport={{ once: true }}
               transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.1 }}
             >Top Players</motion.h2>
           </motion.div>
@@ -708,7 +730,7 @@ export default function Home() {
           {/* Monthly + Countdown */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-8 sm:mb-10">
             <Badge className="bg-gradient-to-r from-[#c084fc] to-[#f472b6] text-white border-0 px-4 py-1.5 text-sm font-semibold shadow-[0_2px_16px_rgba(192,132,252,0.25)]">
-              Monthly
+              {activeSite === "DatDrop" && lbMonth === "previous" ? "Last Month" : "Monthly"}
             </Badge>
             <div className="flex items-center gap-1.5 text-sm">
               <Clock className="w-4 h-4 text-[#9487aa]" />
@@ -721,7 +743,7 @@ export default function Home() {
           {leaderboardData.length >= 3 && (
             <motion.div
               className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6 items-end"
-              initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-50px" }}
+              initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
               variants={staggerContainer}
             >
               <PodiumCard player={leaderboardData[1]} rank={2} className="order-1 pt-10 sm:pt-12" />
@@ -734,7 +756,7 @@ export default function Home() {
           {leaderboardData.length >= 5 && (
             <motion.div
               className="grid grid-cols-2 gap-2 sm:gap-4 mb-8 sm:mb-10 max-w-md mx-auto"
-              initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-50px" }}
+              initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
               variants={staggerContainer}
             >
               <PodiumCard player={leaderboardData[3]} rank={4} />
