@@ -106,14 +106,14 @@ body {
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+  background: linear-gradient(135deg, #c084fc, #f472b6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-full {
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink), var(--accent-blue));
+  background: linear-gradient(135deg, #c084fc, #f472b6, #38bdf8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -122,15 +122,18 @@ body {
 /* Podium */
 .podium-1 {
   background: linear-gradient(135deg, rgba(253, 186, 116, 0.1), rgba(253, 186, 116, 0.03)) !important;
-  border-color: rgba(253, 186, 116, 0.2) !important;
+  border-color: rgba(253, 186, 116, 0.18) !important;
+  box-shadow: 0 4px 40px rgba(253, 186, 116, 0.08), 0 8px 80px rgba(253, 186, 116, 0.04);
 }
 .podium-2 {
-  background: linear-gradient(135deg, rgba(176, 122, 255, 0.08), rgba(176, 122, 255, 0.02)) !important;
-  border-color: rgba(176, 122, 255, 0.15) !important;
+  background: linear-gradient(135deg, rgba(192, 132, 252, 0.08), rgba(192, 132, 252, 0.02)) !important;
+  border-color: rgba(192, 132, 252, 0.15) !important;
+  box-shadow: 0 4px 35px rgba(192, 132, 252, 0.07), 0 8px 70px rgba(192, 132, 252, 0.035);
 }
 .podium-3 {
   background: linear-gradient(135deg, rgba(244, 114, 182, 0.08), rgba(244, 114, 182, 0.02)) !important;
   border-color: rgba(244, 114, 182, 0.15) !important;
+  box-shadow: 0 4px 35px rgba(244, 114, 182, 0.07), 0 8px 70px rgba(244, 114, 182, 0.035);
 }
 
 /* Full-screen animated background wrapper */
@@ -140,22 +143,24 @@ body {
   z-index: -1;
   overflow: hidden;
   background:
-    radial-gradient(1200px 700px at 15% -10%, rgba(255,79,216,.18), transparent 55%),
-    radial-gradient(900px 520px at 85% 15%, rgba(36,215,255,.12), transparent 60%),
-    radial-gradient(900px 520px at 35% 110%, rgba(168,85,247,.12), transparent 55%),
-    linear-gradient(180deg, #07070c, #0b0b10 40%, #07070c);
+    radial-gradient(1200px 700px at 15% -10%, rgba(255,50,180,.25), transparent 55%),
+    radial-gradient(1000px 600px at 75% 20%, rgba(255,80,200,.14), transparent 60%),
+    radial-gradient(900px 520px at 85% 15%, rgba(36,215,255,.10), transparent 60%),
+    radial-gradient(800px 500px at 50% 50%, rgba(176,122,255,.08), transparent 50%),
+    radial-gradient(900px 520px at 35% 110%, rgba(255,60,180,.12), transparent 55%),
+    linear-gradient(180deg, #07070c, #0c0812 40%, #07070c);
 }
 
 /* Sparkle field (moving dots) */
 .sparkles {
   position: absolute;
   inset: -20%;
-  opacity: .25;
-  filter: blur(.2px) saturate(120%);
+  opacity: .3;
+  filter: blur(.2px) saturate(140%);
   background-image:
-    radial-gradient(circle, rgba(255,255,255,.9) 0 1px, transparent 2px),
-    radial-gradient(circle, rgba(255,255,255,.7) 0 1px, transparent 2px),
-    radial-gradient(circle, rgba(255,255,255,.6) 0 1px, transparent 2px);
+    radial-gradient(circle, rgba(255,80,180,.9) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(255,120,200,.7) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(255,60,160,.6) 0 1px, transparent 2px);
   background-size: 140px 140px, 220px 220px, 320px 320px;
   background-position: 0 0, 60px 40px, 120px 90px;
   mix-blend-mode: screen;
@@ -170,10 +175,11 @@ body {
   background:
     linear-gradient(115deg,
       transparent 0%,
-      rgba(255,255,255,.04) 35%,
-      rgba(255,79,216,.08) 45%,
-      rgba(36,215,255,.07) 52%,
-      rgba(255,255,255,.04) 60%,
+      rgba(255,255,255,.03) 35%,
+      rgba(255,60,170,.10) 43%,
+      rgba(255,80,200,.08) 48%,
+      rgba(192,132,252,.06) 52%,
+      rgba(255,255,255,.03) 60%,
       transparent 75%);
   opacity: .55;
   filter: blur(12px);

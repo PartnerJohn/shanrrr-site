@@ -29,17 +29,34 @@ const TWITTER_URL = "https://x.com/shanohni";
 const INSTAGRAM_URL = "#";
 const TIKTOK_URL = "#";
 
+const profileColors = ["#fdba74", "#b07aff", "#f472b6", "#7dd3fc", "#6ee7b7", "#ff6b6b", "#fbbf24", "#a78bfa", "#34d399", "#fb923c"];
+
 const leaderboardData = [
-  { rank: 1, name: "xStarDust", points: 12450, wager: "$284,200", wins: 87 },
-  { rank: 2, name: "CozyPanda99", points: 11200, wager: "$251,800", wins: 74 },
-  { rank: 3, name: "PixelQueen", points: 10800, wager: "$239,400", wins: 69 },
-  { rank: 4, name: "LuckyClover", points: 9340, wager: "$198,600", wins: 58 },
-  { rank: 5, name: "MoonBeam", points: 8720, wager: "$176,300", wins: 52 },
-  { rank: 6, name: "BubbleTea", points: 7890, wager: "$154,800", wins: 45 },
-  { rank: 7, name: "SparkleKid", points: 7210, wager: "$138,200", wins: 41 },
-  { rank: 8, name: "CloudNine", points: 6540, wager: "$121,500", wins: 37 },
-  { rank: 9, name: "SunnyDaze", points: 5980, wager: "$108,900", wins: 33 },
-  { rank: 10, name: "JellyBean", points: 5210, wager: "$94,200", wins: 28 },
+  { rank: 1, name: "xStarDust", wager: "$284,200", avatar: profileColors[0] },
+  { rank: 2, name: "CozyPanda99", wager: "$251,800", avatar: profileColors[1] },
+  { rank: 3, name: "PixelQueen", wager: "$239,400", avatar: profileColors[2] },
+  { rank: 4, name: "LuckyClover", wager: "$198,600", avatar: profileColors[3] },
+  { rank: 5, name: "MoonBeam", wager: "$176,300", avatar: profileColors[4] },
+  { rank: 6, name: "BubbleTea", wager: "$154,800", avatar: profileColors[5] },
+  { rank: 7, name: "SparkleKid", wager: "$138,200", avatar: profileColors[6] },
+  { rank: 8, name: "CloudNine", wager: "$121,500", avatar: profileColors[7] },
+  { rank: 9, name: "SunnyDaze", wager: "$108,900", avatar: profileColors[8] },
+  { rank: 10, name: "JellyBean", wager: "$94,200", avatar: profileColors[9] },
+  { rank: 11, name: "NeonRider", wager: "$87,400", avatar: profileColors[0] },
+  { rank: 12, name: "CherryBomb", wager: "$82,100", avatar: profileColors[1] },
+  { rank: 13, name: "FrostyMint", wager: "$76,800", avatar: profileColors[2] },
+  { rank: 14, name: "ThunderCat", wager: "$71,300", avatar: profileColors[3] },
+  { rank: 15, name: "VelvetRose", wager: "$65,900", avatar: profileColors[4] },
+  { rank: 16, name: "CosmicDust", wager: "$61,200", avatar: profileColors[5] },
+  { rank: 17, name: "WildFox", wager: "$57,400", avatar: profileColors[6] },
+  { rank: 18, name: "PixelDream", wager: "$52,800", avatar: profileColors[7] },
+  { rank: 19, name: "GoldenAce", wager: "$48,300", avatar: profileColors[8] },
+  { rank: 20, name: "LunarWolf", wager: "$44,100", avatar: profileColors[9] },
+  { rank: 21, name: "StormChaser", wager: "$40,600", avatar: profileColors[0] },
+  { rank: 22, name: "DaisyChain", wager: "$37,200", avatar: profileColors[1] },
+  { rank: 23, name: "IronPulse", wager: "$33,800", avatar: profileColors[2] },
+  { rank: 24, name: "CrystalWave", wager: "$30,500", avatar: profileColors[3] },
+  { rank: 25, name: "BlazeFury", wager: "$27,900", avatar: profileColors[4] },
 ];
 
 const communityStats = [
@@ -166,19 +183,16 @@ function PodiumCard({ player, rank, className }: { player: typeof leaderboardDat
           {rank === 1 && (
             <Sparkles className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-5 h-5 text-[#fdba74] opacity-60" />
           )}
-          <div className={`${config.size} rounded-full ${config.bgColor} border-2 ${config.borderColor} flex items-center justify-center mx-auto mb-3`}>
-            <span className={`font-bold ${config.color}`}>{player.name[0]}</span>
+          <div className={`${config.size} rounded-full border-2 ${config.borderColor} flex items-center justify-center mx-auto mb-3`} style={{ background: `color-mix(in srgb, ${player.avatar} 15%, transparent)` }}>
+            <span className="font-bold" style={{ color: player.avatar }}>{player.name[0]}</span>
           </div>
           <div className="flex justify-center mb-1">{config.icon}</div>
           <p className={`text-xs font-semibold ${config.color} mb-1 uppercase tracking-wider`}>{config.label}</p>
           <p className={`font-bold text-white ${rank === 1 ? "text-lg" : ""}`}>{player.name}</p>
           <p className={`font-black ${config.color} mt-1 ${rank === 1 ? "text-2xl sm:text-3xl" : "text-xl sm:text-2xl"}`}>
-            {player.points.toLocaleString()}
+            {player.wager}
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">points</p>
-          <p className={`text-xs mt-2 flex items-center justify-center gap-1 ${rank === 1 ? config.color + "/60" : "text-muted-foreground"}`}>
-            <Zap className="w-3 h-3" /> {player.wager} wagered
-          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">wagered</p>
         </CardContent>
       </Card>
     </motion.div>
@@ -197,11 +211,36 @@ function useKickStatus() {
 
   const check = useCallback(async () => {
     try {
-      const res = await fetch("/api/kick-status");
-      const data = await res.json();
-      setStatus(data);
+      // Fetch directly from Kick API (browser requests are allowed)
+      const res = await fetch(
+        "https://kick.com/api/v2/channels/shanrrr/livestream",
+        { headers: { Accept: "application/json" } }
+      );
+      if (!res.ok) {
+        setStatus({ is_live: false });
+        return;
+      }
+      const json = await res.json();
+      const stream = json?.data;
+      if (!stream || !stream.id) {
+        setStatus({ is_live: false });
+        return;
+      }
+      setStatus({
+        is_live: true,
+        title: stream.session_title || "",
+        viewers: stream.viewers || 0,
+        started_at: stream.created_at || "",
+      });
     } catch {
-      // silently fail
+      // Fallback to our API route
+      try {
+        const res = await fetch("/api/kick-status");
+        const data = await res.json();
+        setStatus(data);
+      } catch {
+        // silently fail
+      }
     }
   }, []);
 
@@ -214,8 +253,7 @@ function useKickStatus() {
   return status;
 }
 
-function StreamSection() {
-  const kickStatus = useKickStatus();
+function StreamSection({ kickStatus }: { kickStatus: KickStatus }) {
 
   return (
     <section id="stream" className="pt-10 pb-16 sm:pb-20 px-4 sm:px-6">
@@ -225,10 +263,10 @@ function StreamSection() {
           initial="hidden" whileInView="visible" viewport={{ once: false }}
           variants={bounceIn}
         >
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <h2 className="text-2xl sm:text-3xl font-bold gradient-text-full inline-block">Watch the Stream</h2>
+          <div className="inline-flex items-baseline justify-center gap-2 mb-2">
+            <h2 className="text-2xl sm:text-3xl font-bold gradient-text-full">Watch the Stream</h2>
             {kickStatus.is_live && (
-              <Badge className="bg-red-500 text-white border-0 animate-pulse text-xs">
+              <Badge className="bg-[#f472b6] text-white border-0 animate-pulse text-xs relative -top-0.5">
                 LIVE
               </Badge>
             )}
@@ -243,11 +281,11 @@ function StreamSection() {
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: false }} variants={bounceIn}>
           <Card className={`bg-[#2a2438]/60 backdrop-blur-xl rounded-2xl relative overflow-hidden transition-all duration-500 ${
             kickStatus.is_live
-              ? "border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.15)]"
-              : "border-[#b07aff]/10"
+              ? "border-[#f472b6]/30 shadow-[0_0_30px_rgba(244,114,182,0.15)]"
+              : "border-transparent"
           }`}>
             <CardContent className="p-4 sm:p-6">
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#b07aff]/8">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#c084fc]/8">
                 <iframe
                   src="https://player.kick.com/shanrrr"
                   width="100%"
@@ -297,6 +335,109 @@ function StreamSection() {
   );
 }
 
+function LeaderboardTable() {
+  const [search, setSearch] = useState("");
+  const query = search.toLowerCase().trim();
+
+  // Show top 10 by default, or filtered results when searching
+  const displayData = query
+    ? leaderboardData.filter((p) => p.name.toLowerCase().includes(query))
+    : leaderboardData.slice(0, 10);
+
+  const rowAccent = (rank: number) => {
+    if (rank === 1) return { bg: "bg-gradient-to-r from-[#fdba74]/10 via-[#fdba74]/5 to-transparent", border: "border-[#fdba74]/20", wager: "text-[#fdba74]", hover: "hover:from-[#fdba74]/15 hover:via-[#fdba74]/8 hover:to-transparent" };
+    if (rank === 2) return { bg: "bg-gradient-to-r from-[#b07aff]/10 via-[#b07aff]/5 to-transparent", border: "border-[#b07aff]/20", wager: "text-[#b07aff]", hover: "hover:from-[#b07aff]/15 hover:via-[#b07aff]/8 hover:to-transparent" };
+    if (rank === 3) return { bg: "bg-gradient-to-r from-[#f472b6]/10 via-[#f472b6]/5 to-transparent", border: "border-[#f472b6]/20", wager: "text-[#f472b6]", hover: "hover:from-[#f472b6]/15 hover:via-[#f472b6]/8 hover:to-transparent" };
+    return { bg: "", border: "border-transparent", wager: "text-white", hover: "hover:bg-[#c084fc]/[0.05]" };
+  };
+
+  return (
+    <>
+      <div className="mb-4 max-w-sm mx-auto relative px-1">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9487aa]" />
+        <Input
+          placeholder="Search your name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-10 rounded-xl bg-[#2a2438]/60 backdrop-blur-xl border-[#c084fc]/10 text-white placeholder:text-[#6b5f7e] focus-visible:ring-2 focus-visible:ring-[#f472b6]/25 focus-visible:border-[#c084fc]/30 transition-shadow"
+        />
+      </div>
+
+      <motion.div
+        key={query || "default"}
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        <Card className="bg-[#2a2438]/60 backdrop-blur-xl border-[#c084fc]/12 rounded-2xl overflow-hidden relative shadow-[0_4px_40px_rgba(192,132,252,0.06),0_8px_80px_rgba(192,132,252,0.03),inset_0_1px_1px_rgba(255,255,255,0.04)]">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b-0 hover:bg-transparent">
+                  <TableHead className="text-[#9487aa] text-xs sm:text-sm py-3.5">Player</TableHead>
+                  <TableHead className="text-[#9487aa] text-right text-xs sm:text-sm py-3.5">Wagered</TableHead>
+                </TableRow>
+              </TableHeader>
+              {/* Gradient line below header */}
+              <tr><td colSpan={2} className="p-0"><div className="h-px bg-gradient-to-r from-transparent via-[#c084fc]/30 to-transparent" /></td></tr>
+              <TableBody>
+                {displayData.length === 0 ? (
+                  <tr>
+                    <TableCell colSpan={2} className="text-center text-sm text-[#6b5f7e] py-8">
+                      No players found for &ldquo;{search}&rdquo;
+                    </TableCell>
+                  </tr>
+                ) : (
+                  displayData.map((player) => {
+                    const accent = rowAccent(player.rank);
+                    return (
+                      <motion.tr
+                        key={player.rank}
+                        variants={staggerItem}
+                        className={`border-b border-[#c084fc]/[0.06] transition-all duration-200 ${accent.bg} ${accent.hover}`}
+                      >
+                        <TableCell className="py-3 sm:py-3.5">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-bold shrink-0 border ring-1"
+                              style={{
+                                background: `color-mix(in srgb, ${player.avatar} 20%, transparent)`,
+                                borderColor: `color-mix(in srgb, ${player.avatar} 35%, transparent)`,
+                                boxShadow: player.rank <= 3 ? `0 0 12px color-mix(in srgb, ${player.avatar} 15%, transparent)` : 'none',
+                                color: player.avatar,
+                                // @ts-expect-error ring color via style
+                                '--tw-ring-color': `color-mix(in srgb, ${player.avatar} 20%, transparent)`,
+                              }}
+                            >
+                              {player.rank}
+                            </div>
+                            <div className="min-w-0">
+                              <span className={`font-semibold text-xs sm:text-sm block ${player.rank <= 3 ? "text-white" : "text-[#f0eaf8]/80"}`}>
+                                {player.name}
+                              </span>
+                              <span className="text-[10px] sm:text-xs text-[#9487aa] block sm:hidden">{player.wager}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className={`text-right font-bold text-xs sm:text-sm py-3 sm:py-3.5 ${accent.wager}`}>
+                          {player.wager}
+                        </TableCell>
+                      </motion.tr>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          {!query && (
+            <div className="text-center py-3 text-[10px] sm:text-xs text-[#6b5f7e] border-t border-[#c084fc]/[0.06]">
+              Showing top 10 — search to find your rank
+            </div>
+          )}
+        </Card>
+      </motion.div>
+    </>
+  );
+}
+
 const socials = [
   {
     name: "Kick",
@@ -330,28 +471,6 @@ const socials = [
     handle: "@shanohni",
     desc: "Stay up to date with announcements, clips, and hot takes.",
     cta: "Follow on X",
-  },
-  {
-    name: "Instagram",
-    icon: <InstagramIcon className="w-6 h-6" />,
-    iconSmall: <InstagramIcon className="w-5 h-5" />,
-    accent: "#E1306C",
-    url: INSTAGRAM_URL,
-    intentUrl: INSTAGRAM_URL,
-    handle: "@shanrrr",
-    desc: "Behind the scenes, stories, and IRL content.",
-    cta: "Follow on Instagram",
-  },
-  {
-    name: "TikTok",
-    icon: <TikTokIcon className="w-6 h-6" />,
-    iconSmall: <TikTokIcon className="w-5 h-5" />,
-    accent: "#ff0050",
-    url: TIKTOK_URL,
-    intentUrl: TIKTOK_URL,
-    handle: "@shanrrr",
-    desc: "Best clips, highlights, and viral moments.",
-    cta: "Follow on TikTok",
   },
 ];
 
@@ -397,7 +516,7 @@ function SocialsSection() {
 
         <Dialog open={!!open} onOpenChange={(v) => !v && setOpen(null)}>
           {activeSocial && (
-            <DialogContent className="bg-[#1a1625]/95 backdrop-blur-2xl border-[#b07aff]/15 max-w-[calc(100vw-2rem)] sm:max-w-sm mx-auto">
+            <DialogContent className="bg-[#1a1625]/95 backdrop-blur-2xl border-[#c084fc]/12 max-w-[calc(100vw-2rem)] sm:max-w-sm mx-auto">
               <DialogHeader>
                 <div className="flex flex-col items-center gap-4 pt-2">
                   <div
@@ -441,10 +560,12 @@ function SocialsSection() {
 }
 
 export default function Home() {
+  const kickStatus = useKickStatus();
+
   return (
     <main className="min-h-screen relative z-10">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#0b0e14]/60 border-b border-[#b07aff]/10">
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#0b0e14]/70 border-b border-[#c084fc]/8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
           <Link href="/" className="text-base sm:text-lg font-bold gradient-text tracking-tight flex items-center gap-2">
             <Heart className="w-4 h-4 text-[#f472b6] fill-[#f472b6]" />
@@ -468,7 +589,7 @@ export default function Home() {
 
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-3xl mx-auto">
           <motion.h1
-            className="text-5xl sm:text-8xl md:text-9xl font-black gradient-text-full leading-tight tracking-tight lowercase drop-shadow-[0_0_40px_rgba(176,122,255,0.5)] [filter:drop-shadow(0_0_80px_rgba(244,114,182,0.3))]"
+            className="text-5xl sm:text-8xl md:text-9xl font-black gradient-text-full leading-tight tracking-tight lowercase drop-shadow-[0_0_40px_rgba(192,132,252,0.35)] [filter:drop-shadow(0_0_80px_rgba(255,80,180,0.2))]"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.5 }}
           >
@@ -486,7 +607,7 @@ export default function Home() {
         </div>
 
         <motion.a
-          href="#leaderboard"
+          href={kickStatus.is_live ? "#stream" : "#leaderboard"}
           className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 cursor-pointer hover:text-white transition-colors"
           animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
         >
@@ -494,8 +615,11 @@ export default function Home() {
         </motion.a>
       </section>
 
+      {/* When live: Stream first, Leaderboard second. When offline: Leaderboard first, Stream second. */}
+      {kickStatus.is_live && <StreamSection kickStatus={kickStatus} />}
+
       {/* Leaderboard Section */}
-      <section id="leaderboard" className="pt-32 sm:pt-60 pb-10 px-4 sm:px-6 relative">
+      <section id="leaderboard" className={kickStatus.is_live ? "pt-10 sm:pt-16 pb-10 px-4 sm:px-6 relative" : "pt-32 sm:pt-60 pb-10 px-4 sm:px-6 relative"}>
 
         <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
@@ -504,7 +628,7 @@ export default function Home() {
             variants={bounceIn}
           >
             <motion.div
-              className="inline-flex items-center gap-2 text-[#b07aff] mb-3"
+              className="inline-flex items-center gap-2 text-[#c084fc] mb-3"
               initial={{ scale: 0.8, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: false }}
@@ -525,12 +649,12 @@ export default function Home() {
           {/* Casino Site Tabs */}
           <div className="flex justify-center mb-4">
             <Tabs defaultValue="gamba">
-              <TabsList className="bg-[#231e30]/50 backdrop-blur-lg border border-[#b07aff]/10">
+              <TabsList className="bg-[#231e30]/50 backdrop-blur-lg border border-[#c084fc]/10">
                 {casinoSites.map((site) => (
                   <TabsTrigger
                     key={site}
                     value={site.toLowerCase().replace(" ", "-")}
-                    className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#b07aff] data-[state=active]:to-[#f472b6] data-[state=active]:text-white data-[state=active]:shadow-sm text-[#9487aa]"
+                    className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#c084fc] data-[state=active]:to-[#f472b6] data-[state=active]:text-white data-[state=active]:shadow-[0_2px_12px_rgba(192,132,252,0.3)] text-[#9487aa]"
                   >
                     {site}
                   </TabsTrigger>
@@ -541,7 +665,7 @@ export default function Home() {
 
           {/* Monthly + Countdown */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-8 sm:mb-10">
-            <Badge className="bg-gradient-to-r from-[#b07aff] to-[#f472b6] text-white border-0 px-4 py-1.5 text-sm font-semibold">
+            <Badge className="bg-gradient-to-r from-[#c084fc] to-[#f472b6] text-white border-0 px-4 py-1.5 text-sm font-semibold shadow-[0_2px_16px_rgba(192,132,252,0.25)]">
               Monthly
             </Badge>
             <div className="flex items-center gap-1.5 text-sm">
@@ -553,95 +677,28 @@ export default function Home() {
 
           {/* Top 3 Podium */}
           <motion.div
-            className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-10"
+            className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-10 items-end"
             initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-50px" }}
             variants={staggerContainer}
           >
-            <PodiumCard player={leaderboardData[1]} rank={2} className="order-1 mt-4 sm:mt-6" />
-            <PodiumCard player={leaderboardData[0]} rank={1} className="order-first sm:order-2" />
-            <PodiumCard player={leaderboardData[2]} rank={3} className="order-3 mt-6 sm:mt-10" />
+            <PodiumCard player={leaderboardData[1]} rank={2} className="order-1 pt-10 sm:pt-12" />
+            <PodiumCard player={leaderboardData[0]} rank={1} className="order-first sm:order-2 pt-0" />
+            <PodiumCard player={leaderboardData[2]} rank={3} className="order-3 pt-16 sm:pt-20" />
           </motion.div>
 
-          {/* Search */}
-          <div className="mb-4 max-w-sm mx-auto relative px-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9487aa]" />
-            <Input
-              placeholder="Search players..."
-              className="pl-10 bg-[#2a2438]/60 backdrop-blur-xl border-[#b07aff]/10 text-white placeholder:text-[#6b5f7e] focus-visible:ring-[#b07aff]/30 focus-visible:border-[#b07aff]/30"
-            />
-          </div>
-
-          {/* Leaderboard Table */}
-          <motion.div
-            initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-50px" }}
-            variants={staggerContainer}
-          >
-            <Card className="bg-[#2a2438]/60 backdrop-blur-xl border-[#b07aff]/10 rounded-2xl overflow-hidden relative">
-              <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-[#b07aff]/8 hover:bg-transparent">
-                    <TableHead className="text-[#9487aa] w-10 sm:w-14 text-center text-xs sm:text-sm">#</TableHead>
-                    <TableHead className="text-[#9487aa] text-xs sm:text-sm">Player</TableHead>
-                    <TableHead className="text-[#9487aa] text-right text-xs sm:text-sm">Points</TableHead>
-                    <TableHead className="text-[#9487aa] text-right hidden sm:table-cell text-xs sm:text-sm">Wagered</TableHead>
-                    <TableHead className="text-[#9487aa] text-right text-xs sm:text-sm">Wins</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {leaderboardData.map((player) => (
-                    <motion.tr
-                      key={player.rank}
-                      variants={staggerItem}
-                      className="border-[#b07aff]/[0.05] hover:bg-[#b07aff]/[0.03] transition-colors"
-                    >
-                      <TableCell className="text-center">
-                        <div className="flex justify-center">
-                          <RankBadge rank={player.rank} />
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2.5">
-                          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold ${
-                            player.rank === 1 ? "bg-[#fdba74]/10 text-[#fdba74] border border-[#fdba74]/20" :
-                            player.rank === 2 ? "bg-[#b07aff]/10 text-[#b07aff] border border-[#b07aff]/15" :
-                            player.rank === 3 ? "bg-[#f472b6]/10 text-[#f472b6] border border-[#f472b6]/15" :
-                            "bg-white/5 text-[#9487aa] border border-white/5"
-                          }`}>
-                            {player.name[0]}
-                          </div>
-                          <span className={`font-semibold text-xs sm:text-sm ${player.rank <= 3 ? "text-white" : "text-[#f0eaf8]/80"}`}>
-                            {player.name}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right font-bold text-white text-xs sm:text-sm">
-                        {player.points.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-right text-[#9487aa] text-xs sm:text-sm hidden sm:table-cell">
-                        {player.wager}
-                      </TableCell>
-                      <TableCell className="text-right text-[#f0eaf8]/70 text-xs sm:text-sm font-medium">
-                        {player.wins}
-                      </TableCell>
-                    </motion.tr>
-                  ))}
-                </TableBody>
-              </Table>
-              </div>
-            </Card>
-          </motion.div>
+          {/* Search + Leaderboard Table */}
+          <LeaderboardTable />
         </div>
       </section>
 
-      {/* Live Stream Section */}
-      <StreamSection />
+      {/* Live Stream Section — below leaderboard when offline */}
+      {!kickStatus.is_live && <StreamSection kickStatus={kickStatus} />}
 
       {/* Socials Section */}
       <SocialsSection />
 
       {/* Giveaway Ticker — fixed bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#0b0e14]/80 backdrop-blur-xl border-t border-[#b07aff]/10 overflow-hidden h-10">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#0b0e14]/85 backdrop-blur-xl border-t border-[#c084fc]/8 overflow-hidden h-10">
         <div className="ticker-track h-full items-center">
           {[...Array(2)].map((_, copy) => (
             <div key={copy} className="flex items-center gap-8 shrink-0 px-4">
@@ -669,7 +726,7 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-[#b07aff]/8 py-6 sm:py-8 pb-14 sm:pb-16 px-4 sm:px-6">
+      <footer className="border-t border-[#c084fc]/8 py-6 sm:py-8 pb-14 sm:pb-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           <span className="text-sm text-[#6b5f7e] flex items-center gap-1">
             &copy; {new Date().getFullYear()} shanrrr

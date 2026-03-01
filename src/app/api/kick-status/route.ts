@@ -9,9 +9,9 @@ export async function GET() {
       {
         headers: {
           Accept: "application/json",
-          "User-Agent": "shanrrr-site/1.0",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
         },
-        next: { revalidate: 0 },
+        cache: "no-store",
       }
     );
 
@@ -19,19 +19,19 @@ export async function GET() {
       return NextResponse.json({ is_live: false });
     }
 
-    const data = await res.json();
+    const json = await res.json();
+    const stream = json?.data;
 
-    // Kick returns null/empty when offline, object when live
-    if (!data || !data.data) {
+    if (!stream || !stream.id) {
       return NextResponse.json({ is_live: false });
     }
 
     return NextResponse.json({
       is_live: true,
-      title: data.data.session_title || "",
-      viewers: data.data.viewer_count || 0,
-      started_at: data.data.created_at || "",
-      thumbnail: data.data.thumbnail?.url || "",
+      title: stream.session_title || "",
+      viewers: stream.viewers || 0,
+      started_at: stream.created_at || "",
+      thumbnail: stream.thumbnail?.src || "",
     });
   } catch {
     return NextResponse.json({ is_live: false });
